@@ -12,6 +12,8 @@ public class MapDisplay : MonoBehaviour
 	[SerializeField]
 	private int mapHeight;
 	[SerializeField]
+	private MeshSettings meshSettings;
+	[SerializeField]
 	private NoiseSettings settings;
 	[SerializeField]
 	private Renderer heightMapRenderer;
@@ -44,7 +46,7 @@ public class MapDisplay : MonoBehaviour
 		SetTextureAndSize(heightMapRenderer, heightTex);
 		SetTextureAndSize(colorMapRenderer, colorTex);
 
-		var meshD = MeshGenerator.GenerateMesh(noiseMap);
+		var meshD = MeshGenerator.GenerateMesh(noiseMap, meshSettings);
 		DrawMesh(meshRenderer, meshD, colorTex);
 	}
 

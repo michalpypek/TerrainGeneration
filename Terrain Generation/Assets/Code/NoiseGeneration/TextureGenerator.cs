@@ -25,6 +25,8 @@ public static class TextureGenerator
 	{
 		Texture2D texture = new Texture2D(width, height);
 		texture.SetPixels(colors);
+		texture.wrapMode = TextureWrapMode.Clamp;
+		texture.filterMode = FilterMode.Point;
 		texture.Apply();
 
 		return texture;

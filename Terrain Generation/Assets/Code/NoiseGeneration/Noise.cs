@@ -27,12 +27,10 @@ public static class Noise
 		float halfWidth = mapWidth / 2f;
 		float halfHeight = mapHeight / 2f;
 
-
 		for (int y = 0; y < mapHeight; y++)
 		{
 			for (int x = 0; x < mapWidth; x++)
 			{
-
 				float amplitude = 1;
 				float frequency = 1;
 				float noiseHeight = 0;

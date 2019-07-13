@@ -1,20 +1,38 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class MapDisplay : MonoBehaviour
 {
 	public int mapWidth;
 	public int mapHeight;
 	public NoiseSettings settings;
-	public Renderer textureRender;
+	public Renderer heightMapRenderer;
+	public Renderer colorMapRenderer;
+	[SerializeField]
+	private List<HeightToColor> colorMappers;
 
 	public bool autoUpdate;
 
 	public void GenerateMap()
 	{
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, settings);
+
+		Color[] colorMap = new Color[mapWidth * mapHeight];
+
+		for (int y = 0; y < mapHeight; y++)
+		{
+			for (int x = 0; x < mapWidth; x++)
+			{
+				float height = noiseMap[x, y];
+				var col = colorMappers.FirstOrDefault(cm => cm.IsInRange(height)).color;
+				colorMap[y * mapWidth + x] = col;
+			}
+		}
+
 		DrawNoiseMap(noiseMap);
+		DrawColorMap(colorMap, mapWidth, mapHeight);
 	}
 
 	public void DrawNoiseMap(float[,] noiseMap)
@@ -35,8 +53,17 @@ public class MapDisplay : MonoBehaviour
 		texture.SetPixels(colourMap);
 		texture.Apply();
 
-		textureRender.sharedMaterial.mainTexture = texture;
-		textureRender.transform.localScale = new Vector3(width, 1, height);
+		heightMapRenderer.sharedMaterial.mainTexture = texture;
+		heightMapRenderer.transform.localScale = new Vector3(width, 1, height);
+	}
+
+	public void DrawColorMap(Color[] colors, int width, int height)
+	{
+		Texture2D texture = new Texture2D(width, height);
+		texture.SetPixels(colors);
+		texture.Apply();
+		colorMapRenderer.sharedMaterial.mainTexture = texture;
+		colorMapRenderer.transform.localScale = new Vector3(width, 1, height);
 	}
 
 	void OnValidate()

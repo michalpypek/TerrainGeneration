@@ -7,9 +7,11 @@ public class MapDisplay : MonoBehaviour
 {
 	public bool autoUpdate;
 
-	[SerializeField]
+	private const int chunkSize = 241;
+
+	//[SerializeField]
 	private int mapWidth;
-	[SerializeField]
+	//[SerializeField]
 	private int mapHeight;
 	[SerializeField]
 	private MeshSettings meshSettings;
@@ -26,6 +28,9 @@ public class MapDisplay : MonoBehaviour
 
 	public void GenerateMap()
 	{
+		mapHeight = chunkSize;
+		mapWidth = chunkSize;
+
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, settings);
 
 		Color[] colorMap = new Color[mapWidth * mapHeight];
@@ -46,7 +51,7 @@ public class MapDisplay : MonoBehaviour
 		SetTextureAndSize(heightMapRenderer, heightTex);
 		SetTextureAndSize(colorMapRenderer, colorTex);
 
-		var meshD = MeshGenerator.GenerateMesh(noiseMap, meshSettings);
+		var meshD = MeshGenerator.GenerateMesh(noiseMap, meshSettings, meshSettings.lod);
 		DrawMesh(meshRenderer, meshD, colorTex);
 	}
 
@@ -67,14 +72,14 @@ public class MapDisplay : MonoBehaviour
 
 	void OnValidate()
 	{
-		if (mapWidth < 1)
-		{
-			mapWidth = 1;
-		}
-		if (mapHeight < 1)
-		{
-			mapHeight = 1;
-		}
+		//if (mapWidth < 1)
+		//{
+		//	mapWidth = 1;
+		//}
+		//if (mapHeight < 1)
+		//{
+		//	mapHeight = 1;
+		//}
 		settings.ValidateValues();
 	}
 }

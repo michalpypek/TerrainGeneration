@@ -18,6 +18,8 @@ public class MapDisplay : MonoBehaviour
 	[SerializeField]
 	private Renderer colorMapRenderer;
 	[SerializeField]
+	private GameObject meshRenderer;
+	[SerializeField]
 	private List<HeightToColor> colorMappers;
 
 	public void GenerateMap()
@@ -41,12 +43,24 @@ public class MapDisplay : MonoBehaviour
 
 		SetTextureAndSize(heightMapRenderer, heightTex);
 		SetTextureAndSize(colorMapRenderer, colorTex);
+
+		var meshD = MeshGenerator.GenerateMesh(noiseMap);
+		DrawMesh(meshRenderer, meshD, colorTex);
 	}
 
 	private void SetTextureAndSize(Renderer toSet, Texture2D texture)
 	{
 		toSet.sharedMaterial.mainTexture = texture;
 		toSet.transform.localScale = new Vector3(texture.width, 1, texture.height);
+	}
+
+	private void DrawMesh(GameObject meshObj, MeshData meshData, Texture2D texture)
+	{
+		var meshFilter = meshObj.GetComponent<MeshFilter>();
+		var meshRenderer = meshObj.GetComponent<MeshRenderer>();
+
+		meshFilter.sharedMesh = meshData.GetMesh();
+		meshRenderer.sharedMaterial.mainTexture = texture;
 	}
 
 	void OnValidate()

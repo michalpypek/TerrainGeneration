@@ -5,15 +5,20 @@ using System.Linq;
 
 public class MapDisplay : MonoBehaviour
 {
-	public int mapWidth;
-	public int mapHeight;
-	public NoiseSettings settings;
-	public Renderer heightMapRenderer;
-	public Renderer colorMapRenderer;
+	public bool autoUpdate;
+
+	[SerializeField]
+	private int mapWidth;
+	[SerializeField]
+	private int mapHeight;
+	[SerializeField]
+	private NoiseSettings settings;
+	[SerializeField]
+	private Renderer heightMapRenderer;
+	[SerializeField]
+	private Renderer colorMapRenderer;
 	[SerializeField]
 	private List<HeightToColor> colorMappers;
-
-	public bool autoUpdate;
 
 	public void GenerateMap()
 	{
@@ -31,39 +36,17 @@ public class MapDisplay : MonoBehaviour
 			}
 		}
 
-		DrawNoiseMap(noiseMap);
-		DrawColorMap(colorMap, mapWidth, mapHeight);
+		var heightTex = TextureGenerator.NoiseToTexture(noiseMap);
+		var colorTex = TextureGenerator.ColorsToTexture(colorMap, mapWidth, mapHeight);
+
+		SetTextureAndSize(heightMapRenderer, heightTex);
+		SetTextureAndSize(colorMapRenderer, colorTex);
 	}
 
-	public void DrawNoiseMap(float[,] noiseMap)
+	private void SetTextureAndSize(Renderer toSet, Texture2D texture)
 	{
-		int width = noiseMap.GetLength(0);
-		int height = noiseMap.GetLength(1);
-
-		Texture2D texture = new Texture2D(width, height);
-
-		Color[] colourMap = new Color[width * height];
-		for (int y = 0; y < height; y++)
-		{
-			for (int x = 0; x < width; x++)
-			{
-				colourMap[y * width + x] = Color.Lerp(Color.black, Color.white, noiseMap[x, y]);
-			}
-		}
-		texture.SetPixels(colourMap);
-		texture.Apply();
-
-		heightMapRenderer.sharedMaterial.mainTexture = texture;
-		heightMapRenderer.transform.localScale = new Vector3(width, 1, height);
-	}
-
-	public void DrawColorMap(Color[] colors, int width, int height)
-	{
-		Texture2D texture = new Texture2D(width, height);
-		texture.SetPixels(colors);
-		texture.Apply();
-		colorMapRenderer.sharedMaterial.mainTexture = texture;
-		colorMapRenderer.transform.localScale = new Vector3(width, 1, height);
+		toSet.sharedMaterial.mainTexture = texture;
+		toSet.transform.localScale = new Vector3(texture.width, 1, texture.height);
 	}
 
 	void OnValidate()

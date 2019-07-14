@@ -3,7 +3,7 @@ using System.Collections;
 
 public static class Noise
 {
-	public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings)
+	public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings, Vector2 center)
 	{
 		float[,] noiseMap = new float[mapWidth, mapHeight];
 
@@ -11,8 +11,8 @@ public static class Noise
 		Vector2[] octaveOffsets = new Vector2[settings.octaves];
 		for (int i = 0; i < settings.octaves; i++)
 		{
-			float offsetX = prng.Next(-100000, 100000) + settings.offset.x;
-			float offsetY = prng.Next(-100000, 100000) + settings.offset.y;
+			float offsetX = prng.Next(-100000, 100000) + settings.offset.x + center.x;
+			float offsetY = prng.Next(-100000, 100000) - settings.offset.y - center.y;
 			octaveOffsets[i] = new Vector2(offsetX, offsetY);
 		}
 
@@ -37,8 +37,8 @@ public static class Noise
 
 				for (int i = 0; i < settings.octaves; i++)
 				{
-					float sampleX = (x - halfWidth) / settings.scale * frequency + octaveOffsets[i].x;
-					float sampleY = (y - halfHeight) / settings.scale * frequency + octaveOffsets[i].y;
+					float sampleX = (x - halfWidth + octaveOffsets[i].x) / settings.scale * frequency ;
+					float sampleY = (y - halfHeight + octaveOffsets[i].y) / settings.scale * frequency ;
 
 					float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
 					noiseHeight += perlinValue * amplitude;

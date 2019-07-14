@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,10 +10,12 @@ public class LODMesh
 	public bool requestedMesh;
 	public bool hasMesh;
 	private int lod;
+	private Action onMeshReceived;
 
-	public LODMesh(int lod)
+	public LODMesh(int lod, Action onMeshReceived)
 	{
 		this.lod = lod;
+		this.onMeshReceived = onMeshReceived;
 	}
 
 	public void RequestMeshData(MapData mapData)
@@ -25,5 +28,6 @@ public class LODMesh
 	{
 		mesh = meshData.GetMesh();
 		hasMesh = true;
+		onMeshReceived();
 	}
 }

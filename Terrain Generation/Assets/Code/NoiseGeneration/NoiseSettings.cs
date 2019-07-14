@@ -4,7 +4,7 @@
 public class NoiseSettings
 {
 	public float scale = 50;
-
+	public bool enabled = true;
 	[Tooltip("Number of noise layers")]
 	public int octaves = 6;
 	[Tooltip("Controls decrease in amplitude of octaves")]

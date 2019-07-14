@@ -29,13 +29,14 @@ public class TerrainChunk
 		meshRenderer = meshObject.AddComponent<MeshRenderer>();
 		meshFilter = meshObject.AddComponent<MeshFilter>();
 		meshRenderer.material = mat;
-		meshObject.transform.position = worldPos;
+		meshObject.transform.position = worldPos * TerrainChunkGenerator.get.TerrainScale;
+		meshObject.transform.localScale = Vector3.one * TerrainChunkGenerator.get.TerrainScale;
 
 		this.detailLevels = detailLevels;
 		lodMeshes = new LODMesh[detailLevels.Length];
 		for (int i = 0; i < lodMeshes.Length; i++)
 		{
-			lodMeshes[i] = new LODMesh(detailLevels[i].lod);
+			lodMeshes[i] = new LODMesh(detailLevels[i].lod, UpdateChunk);
 		}
 
 		SetVisible(false);
@@ -46,6 +47,11 @@ public class TerrainChunk
 	{
 		this.mapData = mapData;
 		hasMapData = true;
+
+		var tex = TextureGenerator.ColorsToTexture(mapData.colorMap, MapGenerator.chunkSize, MapGenerator.chunkSize);
+		meshRenderer.material.mainTexture = tex;
+
+		UpdateChunk();
 	}
 
 	void OnMeshDataReceived(MeshData meshData)
@@ -53,10 +59,13 @@ public class TerrainChunk
 		meshFilter.mesh = meshData.GetMesh();
 	}
 
-	public void UpdateChunk(Vector2 viewerPos, float maxViewDistance)
+	public void UpdateChunk()
 	{
 		if (hasMapData == false)
 			return;
+
+		var viewerPos = TerrainChunkGenerator.get.ViewerPos;
+		var maxViewDistance = TerrainChunkGenerator.get.MaxViewDistance;
 
 		float viewerDsistFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPos));
 		bool visible = viewerDsistFromNearestEdge <= maxViewDistance;

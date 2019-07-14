@@ -8,6 +8,7 @@ using System.Threading;
 public class MapGenerator : Singleton<MapGenerator>
 {
 	public bool autoUpdate;
+	public bool useFalloff;
 
 	public const int chunkSize = 241;
 
@@ -24,12 +25,15 @@ public class MapGenerator : Singleton<MapGenerator>
 	[SerializeField]
 	private List<HeightToColor> colorMappers;
 
+	private float[,] falloffMap;
+
 	private Queue<GeneratorThreadInfo<MapData>> mapThreadCallbacksQueue = new Queue<GeneratorThreadInfo<MapData>>();
 	private Queue<GeneratorThreadInfo<MeshData>> meshThreadCallbacksQueue = new Queue<GeneratorThreadInfo<MeshData>>();
 
 	public void DrawMaps()
 	{
 		MapData mapData = GenerateMapData(Vector2.zero);
+		falloffMap = Noise.GenerateFalloffMap(chunkSize);
 		var heightTex = TextureGenerator.NoiseToTexture(mapData.heightMap);
 		var colorTex = TextureGenerator.ColorsToTexture(mapData.colorMap, chunkSize, chunkSize);
 
@@ -108,6 +112,11 @@ public class MapGenerator : Singleton<MapGenerator>
 		{
 			for (int x = 0; x < chunkSize; x++)
 			{
+				if(useFalloff)
+				{
+					noiseMap[x, y] =  Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
+				}
+
 				float height = noiseMap[x, y];
 				var col = colorMappers.FirstOrDefault(cm => cm.IsInRange(height)).color;
 				colorMap[y * chunkSize + x] = col;
@@ -134,6 +143,8 @@ public class MapGenerator : Singleton<MapGenerator>
 
 	void OnValidate()
 	{
+		falloffMap = Noise.GenerateFalloffMap(chunkSize);
+
 		settings.ValidateValues();
 	}
 }

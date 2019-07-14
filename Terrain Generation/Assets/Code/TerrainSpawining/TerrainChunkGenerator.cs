@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class TerrainChunkGenerator : Singleton<TerrainChunkGenerator>
 {
+	public Vector2 ViewerPos => viewerPos;
+	public float MaxViewDistance => maxViewDistance;
+	public float TerrainScale => terrainScale;
+
+	[SerializeField]
+	private float terrainScale = 1f;
 	[SerializeField]
 	private LODInfo[] detailLevels;
 	[SerializeField]
@@ -11,7 +17,7 @@ public class TerrainChunkGenerator : Singleton<TerrainChunkGenerator>
 	[SerializeField]
 	private Material mapMaterial;
 
-	private const float minMoveToUpdate = 40f;
+	private const float minMoveToUpdate = 10f;
 	private const float sqrMinMove = minMoveToUpdate * minMoveToUpdate;
 	private float maxViewDistance = 300;
 	private Vector2 viewerPos;
@@ -36,11 +42,11 @@ public class TerrainChunkGenerator : Singleton<TerrainChunkGenerator>
 	private void Update()
 	{
 		var viewerPosOld = viewerPos;
-		viewerPos = new Vector2(viewer.position.x, viewer.position.z);
-		//if (Vector2.SqrMagnitude(viewerPos - viewerPosOld) >= sqrMinMove)
-		//{
+		viewerPos = new Vector2(viewer.position.x, viewer.position.z) / terrainScale;
+		if (Vector2.SqrMagnitude(viewerPos - viewerPosOld) >= sqrMinMove)
+		{
 			UpdateVisibleChunks();
-		//}
+		}
 	}
 
 	private void UpdateVisibleChunks()
@@ -59,7 +65,7 @@ public class TerrainChunkGenerator : Singleton<TerrainChunkGenerator>
 				if (posToChunk.ContainsKey(viewedChunkCoord))
 				{
 					var chunk = posToChunk[viewedChunkCoord];
-					chunk.UpdateChunk(viewerPos, maxViewDistance);
+					chunk.UpdateChunk();
 				}
 				else
 				{

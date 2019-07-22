@@ -137,6 +137,8 @@ public class MapGenerator : Singleton<MapGenerator>
 			}
 		}
 
+		textureData.UpdateMeshHeights(terrainMaterial, meshSettings.MinHeight, meshSettings.MaxHeight);
+
 		return new MapData(noiseMap);
 	}
 
@@ -152,6 +154,7 @@ public class MapGenerator : Singleton<MapGenerator>
 		var meshRenderer = meshObj.GetComponent<MeshRenderer>();
 
 		meshFilter.sharedMesh = meshData.GetMesh();
+		meshFilter.transform.localScale = Vector3.one * TerrainChunkGenerator.get.TerrainScale;
 	}
 
 	void OnValidate()

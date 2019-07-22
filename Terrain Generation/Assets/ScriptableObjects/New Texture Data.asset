@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52095e0a130b1f74abab90a5888d7e1b, type: 3}
+  m_Name: New Texture Data
+  m_EditorClassIdentifier: 
+  autoUpdate: 1
+  baseColors:
+  - {r: 0.19339621, g: 0.32020518, b: 1, a: 1}
+  - {r: 0.19215685, g: 1, b: 0.36147055, a: 1}
+  baseStartHeights:
+  - 0
+  - 0.3

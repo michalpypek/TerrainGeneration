@@ -17,4 +17,20 @@ public class MeshSettings : UpdatableData
 	{
 		return heightMultiplicationCurve.Evaluate(heightMapValue) * heightMultiplier;
 	}
+
+	public float MinHeight
+	{
+		get
+		{
+			return TerrainChunkGenerator.get.TerrainScale * heightMultiplier * heightMultiplicationCurve.Evaluate(0);
+		}
+	}
+
+	public float MaxHeight
+	{
+		get
+		{
+			return TerrainChunkGenerator.get.TerrainScale * heightMultiplier * heightMultiplicationCurve.Evaluate(1);
+		}
+	}
 }

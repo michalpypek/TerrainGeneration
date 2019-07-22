@@ -7,4 +7,5 @@ public struct LODInfo
 {
 	public int lod;
 	public float viewDistanceThreshold;
+	public bool useForCollision;
 }

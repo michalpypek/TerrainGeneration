@@ -13,9 +13,11 @@ public class TerrainChunk
 	private bool hasMapData;
 	private MeshRenderer meshRenderer;
 	private MeshFilter meshFilter;
+	private MeshCollider meshCollider;
 
 	private LODInfo[] detailLevels;
 	private LODMesh[] lodMeshes;
+	private LODMesh collisionLODMesh;
 
 	private int previousLod = -1;
 
@@ -28,6 +30,7 @@ public class TerrainChunk
 		meshObject = new GameObject($"Chunk {position}");
 		meshRenderer = meshObject.AddComponent<MeshRenderer>();
 		meshFilter = meshObject.AddComponent<MeshFilter>();
+		meshCollider = meshObject.AddComponent<MeshCollider>();
 		meshRenderer.material = mat;
 		meshObject.transform.position = worldPos * TerrainChunkGenerator.get.TerrainScale;
 		meshObject.transform.localScale = Vector3.one * TerrainChunkGenerator.get.TerrainScale;
@@ -37,6 +40,10 @@ public class TerrainChunk
 		for (int i = 0; i < lodMeshes.Length; i++)
 		{
 			lodMeshes[i] = new LODMesh(detailLevels[i].lod, UpdateChunk);
+			if(detailLevels[i].useForCollision)
+			{
+				collisionLODMesh = lodMeshes[i];
+			}
 		}
 
 		SetVisible(false);
@@ -76,15 +83,32 @@ public class TerrainChunk
 			for (int i = 0; i < detailLevels.Length - 1; i++)
 			{
 				if (viewerDsistFromNearestEdge > detailLevels[i].viewDistanceThreshold)
-					lodIndex++;
+					lodIndex = i + 1;
+				else
+					break;
 			}
 			if(lodIndex != previousLod)
 			{
 				var lodMesh = lodMeshes[lodIndex];
 				if (lodMesh.hasMesh)
+				{
+					previousLod = lodIndex;
 					meshFilter.mesh = lodMesh.mesh;
+				}
 				else if (lodMesh.requestedMesh == false)
 					lodMesh.RequestMeshData(mapData);
+			}
+
+			if(lodIndex == 0)
+			{
+				if(collisionLODMesh.hasMesh)
+				{
+					meshCollider.sharedMesh = collisionLODMesh.mesh;
+				}
+				else if (!collisionLODMesh.requestedMesh)
+				{
+					collisionLODMesh.RequestMeshData(mapData);
+				}
 			}
 		}
 

@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class MeshSettings
+[CreateAssetMenu(menuName = "Terrain Generation/Mesh Settings")]
+public class MeshSettings : UpdatableData
 {
+	public bool useFalloff;
+
 	public float heightMultiplier;
 	public AnimationCurve heightMultiplicationCurve;
 	[Range(0,6)]

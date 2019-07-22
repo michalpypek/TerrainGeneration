@@ -6,34 +6,70 @@ public static class MeshGenerator
 {
 	public static MeshData GenerateMesh(float[,] heightMap, MeshSettings settings, int levelOfDetail)
 	{
-		int width = heightMap.GetLength(0);
-		int height = heightMap.GetLength(1);
-
-		float topLeftX = (width - 1) / -2f;
-		float topLeftZ = (height - 1) / 2f;
-
+		AnimationCurve heightCurve = new AnimationCurve(settings.heightMultiplicationCurve.keys);
 		int simplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-		int verticesPerLine = (width - 1) / simplificationIncrement + 1;
 
-		MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
-		int vertexIndex = 0;
+		int borderSize = heightMap.GetLength(0);
+		int meshSize = borderSize - 2 * simplificationIncrement;
+		int meshSizeUnsimplified = borderSize - 2;
 
-		for (int y = 0; y < height; y+= simplificationIncrement)
+		float topLeftX = (meshSizeUnsimplified - 1) / -2f;
+		float topLeftZ = (meshSizeUnsimplified - 1) / 2f;
+
+		int verticesPerLine = (meshSize - 1) / simplificationIncrement + 1;
+
+		MeshData meshData = new MeshData(verticesPerLine);
+		int[,] vertexIndicesMap = new int[borderSize, borderSize];
+		int meshVertexIndex = 0;
+		int borderVertexIndex = -1;
+
+		for (int y = 0; y < borderSize; y += simplificationIncrement)
 		{
-			for (int x = 0; x < width; x+= simplificationIncrement)
+			for (int x = 0; x < borderSize; x += simplificationIncrement)
 			{
-				meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, settings.GetHeight(heightMap[x,y]), topLeftZ - y);
-				meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
+				bool isBorderVertex = y == 0 || y == borderSize - 1 || x == 0 || x == borderSize - 1;
 
-				if (x < width - 1 && y < height - 1)
+				if (isBorderVertex)
 				{
-					meshData.AddTriangle(vertexIndex, vertexIndex + verticesPerLine + 1, vertexIndex + verticesPerLine);
-					meshData.AddTriangle(vertexIndex, vertexIndex + 1, vertexIndex + verticesPerLine + 1);
+					vertexIndicesMap[x, y] = borderVertexIndex;
+					borderVertexIndex--;
+				}
+				else
+				{
+					vertexIndicesMap[x, y] = meshVertexIndex;
+					meshVertexIndex++;
+				}
+			}
+		}
+
+
+		for (int y = 0; y < borderSize; y += simplificationIncrement)
+		{
+			for (int x = 0; x < borderSize; x += simplificationIncrement)
+			{
+				int vertexIndex = vertexIndicesMap[x, y];
+				Vector2 uv = new Vector2((x - simplificationIncrement) / (float)meshSize, (y - simplificationIncrement) / (float)meshSize);
+				float height = heightCurve.Evaluate(heightMap[x, y]) * settings.heightMultiplier;
+
+				Vector3 vertexPosition = new Vector3(topLeftX + uv.x * meshSizeUnsimplified, height, topLeftZ - uv.y * meshSizeUnsimplified);
+
+				meshData.AddVertex(vertexPosition, uv, vertexIndex);
+
+				if (x < borderSize - 1 && y < borderSize - 1)
+				{
+					int a = vertexIndicesMap[x, y];
+					int b = vertexIndicesMap[x + simplificationIncrement, y];
+					int c = vertexIndicesMap[x, y + simplificationIncrement];
+					int d = vertexIndicesMap[x + simplificationIncrement, y + simplificationIncrement];
+
+					meshData.AddTriangle(a,d,c);
+					meshData.AddTriangle(a,b,d);
 				}
 
 				vertexIndex++;
 			}
 		}
+		meshData.BakeNormals();
 
 		return meshData;
 	}

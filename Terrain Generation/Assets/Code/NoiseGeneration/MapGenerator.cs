@@ -8,9 +8,8 @@ using System.Threading;
 public class MapGenerator : Singleton<MapGenerator>
 {
 	public bool autoUpdate;
-	public bool useFalloff;
 
-	public const int chunkSize = 241;
+	public const int chunkSize = 239;
 
 	[SerializeField]
 	private MeshSettings meshSettings;
@@ -104,7 +103,7 @@ public class MapGenerator : Singleton<MapGenerator>
 
 	private MapData GenerateMapData(Vector2 center)
 	{
-		float[,] noiseMap = Noise.GenerateNoiseMap(chunkSize, chunkSize, settings, center);
+		float[,] noiseMap = Noise.GenerateNoiseMap(chunkSize + 2 , chunkSize + 2, settings, center);
 
 		Color[] colorMap = new Color[chunkSize * chunkSize];
 
@@ -112,7 +111,7 @@ public class MapGenerator : Singleton<MapGenerator>
 		{
 			for (int x = 0; x < chunkSize; x++)
 			{
-				if(useFalloff)
+				if(meshSettings.useFalloff)
 				{
 					noiseMap[x, y] =  Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
 				}

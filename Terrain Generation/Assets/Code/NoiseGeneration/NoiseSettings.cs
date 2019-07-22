@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-[System.Serializable]
-public class NoiseSettings
+[CreateAssetMenu(menuName = "Terrain Generation/NoiseSettings")]
+public class NoiseSettings : UpdatableData
 {
 	public float scale = 50;
 	public bool enabled = true;

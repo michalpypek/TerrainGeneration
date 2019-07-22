@@ -14,15 +14,17 @@ public class MapGenerator : Singleton<MapGenerator>
 	[SerializeField]
 	private MeshSettings meshSettings;
 	[SerializeField]
-	private NoiseSettings settings;
+	private NoiseSettings noiseSettings;
+	[SerializeField]
+	private TextureData textureData;
+	[SerializeField]
+	private Material terrainMaterial;
 	[SerializeField]
 	private Renderer heightMapRenderer;
 	[SerializeField]
 	private Renderer colorMapRenderer;
 	[SerializeField]
 	private GameObject meshRenderer;
-	[SerializeField]
-	private List<HeightToColor> colorMappers;
 
 	private float[,] falloffMap;
 
@@ -32,15 +34,13 @@ public class MapGenerator : Singleton<MapGenerator>
 	public void DrawMaps()
 	{
 		MapData mapData = GenerateMapData(Vector2.zero);
-		falloffMap = Noise.GenerateFalloffMap(chunkSize);
+		falloffMap = Noise.GenerateFalloffMap(chunkSize + 2);
 		var heightTex = TextureGenerator.NoiseToTexture(mapData.heightMap);
-		var colorTex = TextureGenerator.ColorsToTexture(mapData.colorMap, chunkSize, chunkSize);
 
 		SetTextureAndSize(heightMapRenderer, heightTex);
-		SetTextureAndSize(colorMapRenderer, colorTex);
 
 		var meshD = MeshGenerator.GenerateMesh(mapData.heightMap, meshSettings, meshSettings.lod);
-		DrawMesh(meshRenderer, meshD, colorTex);
+		DrawMesh(meshRenderer, meshD);
 	}
 
 	public void RequestMapData(Action<MapData> callback, Vector2 center)
@@ -86,6 +86,19 @@ public class MapGenerator : Singleton<MapGenerator>
 		CheckThreadQueues();
 	}
 
+	private void OnValuesUpdated()
+	{
+		if (!Application.isPlaying)
+		{
+			DrawMaps();
+		}
+	}
+
+	private void OnTextureValuesUpdated()
+	{
+		textureData.ApplyToMaterial(terrainMaterial);
+	}
+
 	private void CheckThreadQueues()
 	{
 		if (mapThreadCallbacksQueue.Count > 0)
@@ -103,26 +116,28 @@ public class MapGenerator : Singleton<MapGenerator>
 
 	private MapData GenerateMapData(Vector2 center)
 	{
-		float[,] noiseMap = Noise.GenerateNoiseMap(chunkSize + 2 , chunkSize + 2, settings, center);
+		float[,] noiseMap = Noise.GenerateNoiseMap(chunkSize + 2 , chunkSize + 2, noiseSettings, center);
 
-		Color[] colorMap = new Color[chunkSize * chunkSize];
-
-		for (int y = 0; y < chunkSize; y++)
+		if(meshSettings.useFalloff)
 		{
-			for (int x = 0; x < chunkSize; x++)
+			if(falloffMap == null)
+			{
+				falloffMap = Noise.GenerateFalloffMap(chunkSize + 2);
+			}
+		}
+
+		for (int y = 0; y < chunkSize + 2; y++)
+		{
+			for (int x = 0; x < chunkSize + 2; x++)
 			{
 				if(meshSettings.useFalloff)
 				{
 					noiseMap[x, y] =  Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
 				}
-
-				float height = noiseMap[x, y];
-				var col = colorMappers.FirstOrDefault(cm => cm.IsInRange(height)).color;
-				colorMap[y * chunkSize + x] = col;
 			}
 		}
 
-		return new MapData(noiseMap, colorMap);
+		return new MapData(noiseMap);
 	}
 
 	private void SetTextureAndSize(Renderer toSet, Texture2D texture)
@@ -131,19 +146,33 @@ public class MapGenerator : Singleton<MapGenerator>
 		toSet.transform.localScale = new Vector3(texture.width, 1, texture.height);
 	}
 
-	private void DrawMesh(GameObject meshObj, MeshData meshData, Texture2D texture)
+	private void DrawMesh(GameObject meshObj, MeshData meshData)
 	{
 		var meshFilter = meshObj.GetComponent<MeshFilter>();
 		var meshRenderer = meshObj.GetComponent<MeshRenderer>();
 
 		meshFilter.sharedMesh = meshData.GetMesh();
-		meshRenderer.sharedMaterial.mainTexture = texture;
 	}
 
 	void OnValidate()
 	{
-		falloffMap = Noise.GenerateFalloffMap(chunkSize);
 
-		settings.ValidateValues();
+		if (meshSettings != null)
+		{
+			meshSettings.OnValuesUpdated -= OnValuesUpdated;
+			meshSettings.OnValuesUpdated += OnValuesUpdated;
+		}
+		if (noiseSettings != null)
+		{
+			noiseSettings.OnValuesUpdated -= OnValuesUpdated;
+			noiseSettings.OnValuesUpdated += OnValuesUpdated;
+		}
+		if (textureData != null)
+		{
+			textureData.OnValuesUpdated -= OnTextureValuesUpdated;
+			textureData.OnValuesUpdated += OnTextureValuesUpdated;
+		}
+
 	}
+
 }

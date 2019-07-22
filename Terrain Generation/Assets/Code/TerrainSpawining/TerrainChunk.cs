@@ -55,9 +55,6 @@ public class TerrainChunk
 		this.mapData = mapData;
 		hasMapData = true;
 
-		var tex = TextureGenerator.ColorsToTexture(mapData.colorMap, MapGenerator.chunkSize, MapGenerator.chunkSize);
-		meshRenderer.material.mainTexture = tex;
-
 		UpdateChunk();
 	}
 

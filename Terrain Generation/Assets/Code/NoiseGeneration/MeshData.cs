@@ -103,8 +103,8 @@ public class MeshData
 
 	private Vector3 SurfaceNormalFromIndices(int indA, int indB, int indC)
 	{
-		var vertA = indA < 0 ? borderVertices[-indA -1] :  vertices[indA];
-		var vertB = indB < 0 ? borderVertices[-indB -1] :vertices[indB];
+		var vertA = indA < 0 ? borderVertices[-indA - 1] : vertices[indA];
+		var vertB = indB < 0 ? borderVertices[-indB - 1] : vertices[indB];
 		var vertC = indC < 0 ? borderVertices[-indC - 1] : vertices[indC];
 
 		var edgeAB = vertB - vertA;
@@ -124,7 +124,8 @@ public class MeshData
 		mesh.vertices = vertices;
 		mesh.uv = uvs;
 		mesh.triangles = triangles;
-		mesh.normals = bakedNormals;
+		mesh.RecalculateNormals();
+		//mesh.normals = bakedNormals;
 		mesh.RecalculateNormals();
 		return mesh;
 	}

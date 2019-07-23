@@ -31,8 +31,16 @@ public class MapGenerator : Singleton<MapGenerator>
 	private Queue<GeneratorThreadInfo<MapData>> mapThreadCallbacksQueue = new Queue<GeneratorThreadInfo<MapData>>();
 	private Queue<GeneratorThreadInfo<MeshData>> meshThreadCallbacksQueue = new Queue<GeneratorThreadInfo<MeshData>>();
 
+	private void Start()
+	{
+		textureData.ApplyToMaterial(terrainMaterial);
+		textureData.UpdateMeshHeights(terrainMaterial, meshSettings.MinHeight, meshSettings.MaxHeight);
+	}
+
 	public void DrawMaps()
 	{
+		textureData.UpdateMeshHeights(terrainMaterial, meshSettings.MinHeight, meshSettings.MaxHeight);
+
 		MapData mapData = GenerateMapData(Vector2.zero);
 		falloffMap = Noise.GenerateFalloffMap(chunkSize + 2);
 		var heightTex = TextureGenerator.NoiseToTexture(mapData.heightMap);
@@ -136,8 +144,6 @@ public class MapGenerator : Singleton<MapGenerator>
 				}
 			}
 		}
-
-		textureData.UpdateMeshHeights(terrainMaterial, meshSettings.MinHeight, meshSettings.MaxHeight);
 
 		return new MapData(noiseMap);
 	}

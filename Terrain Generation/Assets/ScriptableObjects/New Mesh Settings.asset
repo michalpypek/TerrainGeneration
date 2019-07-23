@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: New Mesh Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  useFalloff: 0
+  useFalloff: 1
   heightMultiplier: 14.91
   heightMultiplicationCurve:
     serializedVersion: 2
@@ -31,11 +31,11 @@ MonoBehaviour:
       time: 0.3
       value: 0
       inSlope: Infinity
-      outSlope: -0.016362444
+      outSlope: 1.7179487
       tangentMode: 7
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.13411361
+      outWeight: 0.06642218
     - serializedVersion: 3
       time: 1
       value: 1
